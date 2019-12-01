@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Extend Residence Comment
- * Version: 1.0.0
+ * Version: 1.0.1
  * Plugin URI: http://github.com/19h47/extend-residence-comment
  * Description: A plugin to add additional fields in the residence comment form.
  * Author: Jérémy Levron
@@ -68,6 +68,11 @@ function custom_fields( $fields ) {
 		'<input id="url" name="url" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) .
 		'" size="30"  tabindex="3" /></p>';
 
+	$fields['phone'] = '<p class="comment-form-phone">' .
+		'<label for="phone">' . __( 'Website' ) . '</label>' .
+		'<input id="phone" name="phone" type="tel" value="' . esc_attr( $commenter['comment_author_phone'] ) .
+		'" size="30"  tabindex="3" /></p>';
+
 	return $fields;
 }
 
@@ -90,6 +95,11 @@ function additional_fields() {
 	$html .= '<p class="comment-form-date-visit">';
 	$html .= '<label for="date_visit">' . __( 'Date de visite' ) . '</label>';
 	$html .= '<input id="date_visit" name="date_visit" type="date"/></p>';
+
+	// Phone.
+	$html .= '<p class="comment-form-phone">';
+	$html .= '<label for="phone">' . __( 'Téléphone' ) . '</label>';
+	$html .= '<input id="phone" name="phone" type="tel"/></p>';
 
 	// Ratings.
 	foreach ( RATINGS as $rating ) {
@@ -128,6 +138,12 @@ function save_comment_meta_data( $comment_id ) {
 		$comment_id,
 		'date_visit',
 		wp_filter_nohtml_kses( wp_unslash( $_POST['date_visit'] ) )
+	);
+
+	add_comment_meta(
+		$comment_id,
+		'phone',
+		wp_filter_nohtml_kses( wp_unslash( $_POST['phone'] ) )
 	);
 
 	foreach ( RATINGS as $data ) {
@@ -188,8 +204,9 @@ function extend_residence_comment_add_meta_box() {
  * @see https://developer.wordpress.org/reference/classes/wp_comment/
  */
 function extend_residence_comment_meta_box( $comment ) {
-	$title = get_comment_meta( $comment->comment_ID, 'title', true );
+	$title      = get_comment_meta( $comment->comment_ID, 'title', true );
 	$date_visit = get_comment_meta( $comment->comment_ID, 'date_visit', true );
+	$phone      = get_comment_meta( $comment->comment_ID, 'phone', true );
 
 	$ratings = array();
 
@@ -238,6 +255,13 @@ function extend_residence_comment_edit_metafields( $comment_id ) {
 		delete_comment_meta( $comment_id, 'date_visit' );
 	}
 
+	if ( isset( $_POST['phone'] ) && esc_html( ! empty( $_POST['phone'] ) ) ) {
+		$title = wp_filter_nohtml_kses( wp_unslash( $_POST['phone'] ) );
+		update_comment_meta( $comment_id, 'phone', $title );
+	} else {
+		delete_comment_meta( $comment_id, 'phone' );
+	}
+
 	foreach ( RATINGS as $rating ) {
 		if ( ( isset( $_POST[ $rating['id'] ] ) ) && ( ! empty( (int) $_POST[ $rating['id'] ] ) ) ) {
 			update_comment_meta(
@@ -258,15 +282,20 @@ add_filter( 'comment_text', 'modify_comment', 10, 1 );
  * Add the comment meta (saved earlier) to the comment text
  * You can also output the comment meta values directly in comments template
  *
- * @param str $comment_text Text of the current comment.
+ * @param string $comment_text Text of the current comment.
  *
  * @see https://developer.wordpress.org/reference/functions/comment_text/
  */
-function modify_comment( $comment_text ) {
+function modify_comment( string $comment_text ) {
 	$plugin_url_path = WP_PLUGIN_URL;
 
 	$date_visit = get_comment_meta( get_comment_ID(), 'date_visit', true );
-	$title = get_comment_meta( get_comment_ID(), 'title', true );
+	$title      = get_comment_meta( get_comment_ID(), 'title', true );
+	$phone      = get_comment_meta( get_comment_ID(), 'phone', true );
+
+	if ( $phone ) {
+		$comment_text = '<strong>' . esc_attr( $phone ) . '</strong><br/>' . $comment_text;
+	}
 
 	if ( $date_visit ) {
 		$comment_text = '<strong>' . gmdate( 'j F Y', strtotime( $date_visit ) ) . '</strong><br/>' . $comment_text;

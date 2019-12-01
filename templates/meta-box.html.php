@@ -17,6 +17,13 @@
 		</td>
 	</tr>
 
+	<tr>
+		<th scope="row"><label for="phone"><?php esc_html_e( 'Numéro de téléphone' ); ?></label></th>
+		<td>
+			<input type="tel" name="phone" value="<?php echo esc_attr( $phone ); ?>" class="regular-text ltr" />
+		</td>
+	</tr>
+
 <?php foreach ( $ratings as $rating ) {  ?>
 	<tr>
 		<th scope="row"><label for="<?php echo $rating['id'] ?>"><?php echo $rating['label'] ?></label></th>
