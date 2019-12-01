@@ -1,0 +1,17 @@
+{
+    "name": "19h47/extend-residence-comment",
+    "description": "Extend Residence comment",
+    "require": {},
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.5",
+        "wp-coding-standards/wpcs": "^2.2",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
+    },
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Jérémy Levron",
+            "email": "jeremylevron@19h47.fr"
+        }
+    ]
+}
